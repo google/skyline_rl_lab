@@ -6,6 +6,7 @@ from typing import Any, Optional, Protocol
 
 @dataclasses.dataclass
 class ActionResult:
+  action: Any
   state: Any
   reward: Any
   is_done: bool
@@ -19,6 +20,10 @@ class Environment(Protocol):
     """Resets the environment."""
     ...
 
+  def info(self) -> Any:
+    """Get environment information."""
+    ...
+
   def step(self, action: Any) -> ActionResult:
     """Takes action in the environment.
 
@@ -29,6 +34,10 @@ class Environment(Protocol):
 
   def available_actions(self) -> list[Any]:
     """Gets available action list."""
+    ...
+
+  def random_action(self, s: Optional[Any]=None) -> Optional[Any]:
+    """Gets random action from given state."""
     ...
 
   def available_states(self) -> list[Any]:

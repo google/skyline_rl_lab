@@ -1,6 +1,7 @@
 """GridWorld environment to play with RL algorithms."""
 from __future__ import annotations
 
+import random
 from skyline.lab import errors
 from skyline.lab import env
 from typing import Optional
@@ -80,6 +81,18 @@ class GridWorldEnvironment(env.Environment):
       GridState(2, 3): ('L', 'U'),
     }
 
+  def info(self) -> Any:
+    """Get environment information."""
+    print('- environment is a grid world')
+    print("- x means you can't go there")
+    print('- s means start position')
+    print('- number means reward at that state')
+    print('===========')
+    print('.  .  .  1')
+    print('.  x  . -1')
+    print('s  .  .  .')
+    print('===========\n')
+
   def reset(self):
     """Reset the environment."""
     self._state = self._begin_state.copy()
@@ -88,19 +101,25 @@ class GridWorldEnvironment(env.Environment):
     """Sets the current state."""
     self._state = s.copy()
 
+  def random_action(self, s: Optional[GridState]=None) -> Optional[str]:
+    """Get random action."""
+    s = s or self.current_state
+    return random.choice(self.actions.get(s, [None]))
+
   def available_actions(self) -> list[Any]:
     """Get available actions."""
     return [action.value[0] for action in GridAction]
 
   def available_states(self) -> list[Any]:
     """Gets available state list."""
-    return [state.copy for state in self.actions.keys()]
+    return [state.copy() for state in self.actions.keys()]
 
   def step(self, action: str) -> ActionResult:
     # check if legal move first
     new_state = self._state.copy()
     if action not in self.actions[new_state]:
-      raise errors.IllegalAction()
+      raise errors.IllegalActionError(
+          f'action={action} can not in state={new_state}')
 
     move_i, move_j = GridAction.get_move(action)
     new_state.i += move_i
@@ -109,6 +128,7 @@ class GridWorldEnvironment(env.Environment):
     reward =  self.rewards.get(self._state, 0)
 
     return env.ActionResult(
+        action=action,
         state=new_state,
         reward=reward,
         is_done=self.is_done,
