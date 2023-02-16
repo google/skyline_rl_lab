@@ -7,6 +7,8 @@ from tqdm import tqdm
 
 
 class MonteCarlo(alg.RLAlgorithm):
+  """Monte Carlo Method."""
+
   def __init__(self, round_num: int=10000, gamma: float=0.9):
     self._round = round_num
     self._gamma = gamma

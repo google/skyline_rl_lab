@@ -56,29 +56,32 @@ class GridWorldEnvironment(env.Environment):
   ```
   .  .  .  1
   .  x  . -1
-  s  .  .  .
+  .  .  .  x
+  s  x  .  2
   ```
   """
 
   def __init__(self, init_state: Optional[GridState] = None):
-    self.rows = 3
+    self.rows = 4
     self.cols = 4
-    init_state = init_state or GridState(i=2, j=0)
+    init_state = init_state or GridState(i=3, j=0)
     self._begin_state = init_state
     self._state = self._begin_state.copy()
     self.rewards = {
         GridState(i=0, j=3): 1,
-        GridState(i=1, j=3): -1}
+        GridState(i=1, j=3): -1,
+        GridState(i=3, j=3): 2}
     self.actions = {
       GridState(0, 0): ('D', 'R'),
       GridState(0, 1): ('L', 'R'),
       GridState(0, 2): ('L', 'D', 'R'),
       GridState(1, 0): ('U', 'D'),
       GridState(1, 2): ('U', 'D', 'R'),
-      GridState(2, 0): ('U', 'R'),
+      GridState(2, 0): ('U', 'D', 'R'),
       GridState(2, 1): ('L', 'R'),
-      GridState(2, 2): ('L', 'R', 'U'),
-      GridState(2, 3): ('L', 'U'),
+      GridState(2, 2): ('L', 'R', 'U', 'D'),
+      GridState(3, 0): ('U'),
+      GridState(3, 2): ('U', 'R'),
     }
 
   def info(self) -> Any:
@@ -90,7 +93,8 @@ class GridWorldEnvironment(env.Environment):
     print('===========')
     print('.  .  .  1')
     print('.  x  . -1')
-    print('s  .  .  .')
+    print('.  .  .  x')
+    print('s  x  .  2')
     print('===========\n')
 
   def reset(self):

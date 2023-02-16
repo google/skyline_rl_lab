@@ -13,11 +13,19 @@ def print_values(V, env: gridworld_env.GridWorldEnvironment):
   for i in range(env.rows):
     print("---------------------------")
     for j in range(env.cols):
-      v = V.get(gridworld_env.GridState(i, j), 0)
-      if v >= 0:
-        print(" %.2f|" % v, end="")
+      state = gridworld_env.GridState(i, j)
+      if state in env.rewards:
+        reward = env.rewards[state]
+        if reward >= 0:
+          print(" %.2f|" % env.rewards[state], end="")
+        else:
+          print("%.2f|" % env.rewards[state], end="")
       else:
-        print("%.2f|" % v, end="") # -ve sign takes up an extra space
+        v = V.get(state, 0)
+        if v >= 0:
+          print(" %.2f|" % v, end="")
+        else:
+          print("%.2f|" % v, end="") # -ve sign takes up an extra space
     print("")
 
 
@@ -31,6 +39,11 @@ def print_policy(P, env: gridworld_env.GridWorldEnvironment):
   for i in range(env.rows):
     print("---------------------------")
     for j in range(env.cols):
-      a = P.get(gridworld_env.GridState(i, j), ' ')
+      state = gridworld_env.GridState(i, j)
+      if state in env.rewards:
+        print("  ?  |", end="")
+        continue
+
+      a = P.get(state, 'x')
       print("  %s  |" % a, end="")
     print("")
