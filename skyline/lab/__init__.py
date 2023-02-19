@@ -15,8 +15,34 @@
 """Entry point to get RL testing environment."""
 import enum
 
+from prettytable import PrettyTable
+
 from skyline.lab import errors
 from skyline.lab import gridworld_env
+from skyline.lab import rl_protos
+
+
+class Scoreboard:
+  """Scoreboard to rank the RL methods."""
+
+  def rank(self, examiner: rl_protos.RLExaminer,
+           env: rl_protos.Environment,
+           rl_methods: list[rl_protos.RLAlgorithmProto]) -> dict[rl_protos.RLAlgorithmProto, rl_protos.Comparable]:
+    """Ranks the given RL methods."""
+    rl_2_score_dict = {}
+    for rl_method in rl_methods:
+      rl_2_score_dict[rl_method.name] = examiner.score(rl_method, env)
+
+    sorted_scores = sorted(
+        rl_2_score_dict.items(), key=lambda t: t[1], reverse=True)
+
+    score_board = PrettyTable()
+    score_board.field_names = ['Rank.', 'RL Name', 'Score']
+    for rank, score_info in enumerate(sorted_scores, start=1):
+      score_board.add_row([rank, score_info[0], score_info[1]])
+
+    print(score_board)
+    return sorted_scores
 
 
 class Env(enum.Enum):
@@ -40,7 +66,7 @@ def list_env():
   print("")
 
 
-def make(env: Env) -> env.Environment:
+def make(env: Env) -> rl_protos.Environment:
   """Make the environment.
 
   Args:

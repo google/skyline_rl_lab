@@ -16,14 +16,16 @@
 import numpy as np
 
 from skyline.lab import alg
-from skyline.lab import env
+from skyline.lab import rl_protos
 from tqdm import tqdm
+from typing import Optional
 
 
 class MonteCarlo(alg.RLAlgorithm):
   """Monte Carlo Method."""
 
-  def __init__(self, round_num: int=10000, gamma: float=0.9):
+  def __init__(self, name: Optional[str]=None, round_num: int=10000, gamma: float=0.9):
+    self._name = name or self.__class__.__name__
     self._round = round_num
     self._gamma = gamma
     self._state_2_value = {}
@@ -31,15 +33,30 @@ class MonteCarlo(alg.RLAlgorithm):
     self._policy = {}  # Key as state; value as action
     self._deltas = []
     self._sample_counts = {}
+    self._deltas = []
 
-  def fit(self, environment: env.Environment):
+  def _reset(self):
+    self._state_2_value = {}
+    self._q = {}
+    self._policy = {}  # Key as state; value as action
+    self._deltas = []
+    self._sample_counts = {}
+    self._deltas = []
+
+  @property
+  def name(self) -> str:
+    """Gets name of RL method."""
+    return self._name
+
+  def fit(self, environment: rl_protos.Environment):
     """Conducts training by given environment."""
     # initialize V(s) and returns
-    self._deltas = []
+    self._reset()
     returns = {}  # dictionary of state -> list of returns we've received
     states = environment.available_states()
     actions = environment.available_actions()
     for s in states:
+      environment.reset()
       environment.set_state(s)
       self._policy[s] = environment.random_action()
       self._state_2_value[s] = 0
@@ -47,6 +64,7 @@ class MonteCarlo(alg.RLAlgorithm):
     # Initialize Q(s,a) and returns
     self._sample_counts = {}
     for s in states:
+      environment.reset()
       environment.set_state(s)
       if not environment.is_done:
         self._q[s] = {}
@@ -83,7 +101,7 @@ class MonteCarlo(alg.RLAlgorithm):
 
           # update policy
           best_action = self.max_dict(self._q[s])[0]
-          if best_action in environment.actions[s]:
+          if best_action in environment.available_actions(s):
             self._policy[s] = best_action
 
           # update delta
@@ -94,13 +112,13 @@ class MonteCarlo(alg.RLAlgorithm):
       for s, _ in self._q.items():
         self._state_2_value[s] = self.max_dict(self._q[s])[1]
 
-  def play(self, environment: env.Environment):
+  def play(self, environment: rl_protos.Environment):
     """Plays in the given environment."""
     result = environment.step(
         self._policy[environment.current_state])
     return result
 
-  def _play_game(self, environment: env.Environment, max_steps=20):
+  def _play_game(self, environment: rl_protos.Environment, max_steps=20):
     # reset game to start at a random position
     # we need to do this if we have a deterministic policy
     # we would never end up at certain states,
@@ -127,7 +145,12 @@ class MonteCarlo(alg.RLAlgorithm):
       if environment.is_done:
         break
 
-      a = self._policy[s]
+      a = self._policy.get(s, None)
+      if not a:
+        random_action = environment.random_action()
+        self._policy[s] = random_action
+        a = random_action
+
       actions.append(a)
 
     # we want to return:

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import random
 from skyline.lab import errors
-from skyline.lab import env
+from skyline.lab import rl_protos
 from typing import Optional
 import enum
 import dataclasses
@@ -57,7 +57,7 @@ class GridAction(enum.Enum):
         return action.value[1:]
 
 
-class GridWorldEnvironment(env.Environment):
+class GridWorldEnvironment(rl_protos.Environment):
   """GridWorld environment for testing RL algorithm.
 
   This class defines a grid that describes the reward for arriving at each
@@ -124,9 +124,16 @@ class GridWorldEnvironment(env.Environment):
     s = s or self.current_state
     return random.choice(self.actions.get(s, [None]))
 
-  def available_actions(self) -> list[Any]:
+  def available_actions(self, s: Optional[GridState]=None) -> list[Any]:
     """Get available actions."""
-    return [action.value[0] for action in GridAction]
+    if not s:
+      return [action.value[0] for action in GridAction]
+
+    return self.actions[s]
+
+  def available_actions_from_current_state(self) -> list[Any]:
+    """Gets available action list from current state."""
+    return self.actions.get(self.current_state, [])
 
   def available_states(self) -> list[Any]:
     """Gets available state list."""
@@ -145,7 +152,7 @@ class GridWorldEnvironment(env.Environment):
     self._state = new_state.copy()
     reward =  self.rewards.get(self._state, 0)
 
-    return env.ActionResult(
+    return rl_protos.ActionResult(
         action=action,
         state=new_state,
         reward=reward,
@@ -161,3 +168,24 @@ class GridWorldEnvironment(env.Environment):
   def is_done(self) -> bool:
     """Checks if environment is completed."""
     return self._state not in self.actions
+
+
+class GridWorldExaminer(rl_protos.RLExaminer):
+  """Examiner of GridWorld."""
+
+  def score(self, rl_method: RLAlgorithmProto, env: Environment,
+            play_round: int=1) -> Comparable:
+    """Calculates the score of given RL method."""
+    collected_reward_list = []
+    for _ in range(play_round):
+      env.reset()
+      step_count = 0
+      accumulated_reward = 0
+      while not env.is_done:
+        result = rl_method.play(env)
+        step_count += 1
+        accumulated_reward += result.reward
+
+      collected_reward_list.append(accumulated_reward / step_count)
+
+    return sum(collected_reward_list) / len(collected_reward_list)

@@ -14,23 +14,11 @@
 
 import numpy as np
 
-from skyline.lab import env
+from skyline.lab import rl_protos
 from typing import Any, Optional, Mapping, Protocol, Union
 
 
-class RLAlgorithmProto(Protocol):
-  """Reinforcement learning algorithm protocol."""
-
-  def fit(self, environment: env.Environment):
-    """Conducts training by given environment."""
-    ...
-
-  def play(self, environment: env.Environment):
-    """Plays in the given environment."""
-    ...
-
-
-class RLAlgorithm(RLAlgorithmProto):
+class RLAlgorithm(rl_protos.RLAlgorithmProto):
 
   def max_dict(self, d: Mapping[Any, Union[int, float]]):
     """ returns the argmax (key) and max (value) from a dictionary

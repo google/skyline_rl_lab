@@ -28,6 +28,10 @@ class ActionResult:
   info: Optional[Any] = None
 
 
+class Comparable(Protocol):
+  """Something that is comparable used in sorting."""
+  def __lt__(self, other: Any) -> bool: ...
+
 
 class Environment(Protocol):
   def reset(self):
@@ -46,8 +50,12 @@ class Environment(Protocol):
     """
     ...
 
-  def available_actions(self) -> list[Any]:
-    """Gets available action list."""
+  def available_actions(self, s: Optional[Any]=None) -> list[Any]:
+    """Gets available action list (from given state)."""
+    ...
+
+  def available_actions_from_current_state(self) -> list[Any]:
+    """Gets available action list from current state."""
     ...
 
   def random_action(self, s: Optional[Any]=None) -> Optional[Any]:
@@ -63,6 +71,11 @@ class Environment(Protocol):
     ...
 
   @property
+  def name(self) -> str:
+    """Gets name of RL method."""
+    ...
+
+  @property
   def current_state(self) -> Any:
     """Gets current state."""
     ...
@@ -70,4 +83,37 @@ class Environment(Protocol):
   @property
   def is_done(self) -> bool:
     """Checks if environment is completed."""
+    ...
+
+
+class RLAlgorithmProto(Protocol):
+  """Reinforcement learning algorithm protocol."""
+
+  @property
+  def name(self) -> str:
+    """Gets name of RL method."""
+    return self.__class__.__name__
+
+  def fit(self, environment: Environment):
+    """Conducts training by given environment."""
+    ...
+
+  def play(self, environment: Environment):
+    """Plays in the given environment."""
+    ...
+
+
+class RLExaminer(Protocol):
+  """Used to calculate the score of RL method."""
+
+  def score(self, rl_method: RLAlgorithmProto, env: Environment) -> Comparable:
+    """Evaluates the given RL method with given environment.i
+
+    Args:
+      rl_method: RL method to evaluation.
+      env: Environment to evaluate given RL method.
+
+    Returns:
+      Score of evaluation result.
+    """
     ...
