@@ -54,15 +54,37 @@ GridState(i=3, j=0)
 
 ## Experiments of RL algorithms
 Here we are going to test some well-known RL algorithms and demonstrate the
-usage of this lab.
+usage of this lab. All RL methods we are going to implement must implement proto
+<font color='blue'>**RLAlgorithmProto**</font> in
+[`rl_protos.py`](skyline/lab/rl_protos.p). We will take a look at some
+implementation of RL methods to know the usage of them.
 
 ### Monte Carlo Method
 <b>In this method, we simply simulate many trajectories</b> (<font color='brown'>decision processes</font>)<b>, and calculate the average returns.</b> ([wiki page](https://en.wikiversity.org/wiki/Reinforcement_Learning#Monte_Carlo_policy_evaluation))
 
-We implement this algorithm in [`monte_carlo.py`](skyline_rl_lab/blob/main/skyline/lab/alg/monte_carlo.py). The code below will demonstrate the usage of it:
+We implement this algorithm in [`monte_carlo.py`](skyline/lab/alg/monte_carlo.py). Below code snippet will initialize this RL method:
 ```python
 >>> from skyline.lab.alg import monte_carlo
 >>> mc_alg = monte_carlo.MonteCarlo()
+```
+
+Each RL method object will support method `fit` to learn from the given
+environment object. For example:
+```python
+>>> mc_alg.fit(grid_env)
+```
+
+Then we can leverage utility [`gridworld_utils.py`](skyline/lab/gridworld_utils.py) to print out the learned RL knowledge. Below will show the learned [value function](https://en.wikipedia.org/wiki/Reinforcement_learning#Value_function) from the Monte Carlo method:
+```python
+>>> gridworld_utils.print_values(mc_alg._state_2_value, grid_env)
+---------------------------
+ 1.18| 1.30| 1.46| 1.00|
+---------------------------
+ 1.31| 0.00| 1.62|-1.00|
+---------------------------
+ 1.46| 1.62| 1.80| 0.00|
+---------------------------
+ 1.31| 0.00| 2.00| 2.00|
 ```
 
 ## Resources
