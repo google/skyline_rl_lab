@@ -4,6 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 import dataclasses
 from itertools import permutations, product
+import matplotlib.pyplot as plt
 import random
 from immutabledict import immutabledict
 
@@ -36,11 +37,15 @@ DEFAULT_TEST_CASE_MODEL = TestCaseModel(
 
 
 class BCSTEnvironment(rl_protos.Environment):
-  """Mock BCST environment to simulate test case selection."""
+  """Mock BCST environment to simulate test case selection.
+
+  Attributes:
+    round_num: Number of round to execute selected test case.
+  """
 
   def __init__(self, test_case_model: TestCaseModel = DEFAULT_TEST_CASE_MODEL,
                round_num: int = 500):
-    self._round_num = round_num
+    self.round_num = round_num
     self._exe_round = 0
     self._test_case_list = list(test_case_model.test_case_name_set)
     self._fail_state_info = test_case_model.fail_state_info.copy()
@@ -57,6 +62,8 @@ class BCSTEnvironment(rl_protos.Environment):
   def info(self) -> Any:
     """Get environment information."""
     print('- Environment as BCST testing environment.')
+    print('- You can set attribute `round_num` of environment to decide the max round'
+          '  of execution.')
 
   def reset(self):
     """Reset the environment."""
@@ -92,9 +99,14 @@ class BCSTEnvironment(rl_protos.Environment):
   @property
   def is_done(self) -> bool:
     """Checks if environment is completed."""
-    return self._exe_round >= self._round_num
+    return self._exe_round >= self.round_num
 
   def step(self, action: str) -> ActionResult:
+    """Executes the given action and return result.
+
+    Returns:
+      Executed result including current state, reward etc.
+    """
     self._exe_round += 1
     self._selected_test_case_history.append(action)
     reward = 0
@@ -117,7 +129,8 @@ class BCSTRewardCountExaminer(rl_protos.RLExaminer):
   """Examiner to count reward collected by RL method."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
-            play_round: int=1) -> Comparable:
+            play_round: int=10,
+            show_boxplot: bool=False) -> tuple[Comparable, list[int]]:
     """Calculates the score of given RL method."""
     collected_reward_list = []
     for _ in range(play_round):
@@ -129,4 +142,11 @@ class BCSTRewardCountExaminer(rl_protos.RLExaminer):
 
       collected_reward_list.append(accumulated_reward)
 
-    return sum(collected_reward_list) / len(collected_reward_list)
+    if show_boxplot:
+      fig, ax = plt.subplots()
+      ax.set_title(f'RL method({rl_method.name}) on environment {env}')
+      ax.boxplot(collected_reward_list, vert=False)
+
+    return (
+        sum(collected_reward_list) / len(collected_reward_list),
+        collected_reward_list)

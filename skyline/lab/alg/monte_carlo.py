@@ -14,7 +14,6 @@
 
 """This module implement monte carlo algorithm to conduct RL."""
 import numpy as np
-
 from skyline.lab import alg
 from skyline.lab import rl_protos
 from tqdm import tqdm

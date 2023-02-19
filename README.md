@@ -52,6 +52,19 @@ After taking action `U`, we expect the i-axis to move up from 3->2 and we can co
 GridState(i=3, j=0)
 ```
 
+## Experiments of RL algorithms
+Here we are going to test some well-known RL algorithms and demonstrate the
+usage of this lab.
+
+### Monte Carlo Method
+<b>In this method, we simply simulate many trajectories</b> (<font color='brown'>decision processes</font>)<b>, and calculate the average returns.</b> ([wiki page](https://en.wikiversity.org/wiki/Reinforcement_Learning#Monte_Carlo_policy_evaluation))
+
+We implement this algorithm in [`monte_carlo.py`](skyline_rl_lab/blob/main/skyline/lab/alg/monte_carlo.py). The code below will demonstrate the usage of it:
+```python
+>>> from skyline.lab.alg import monte_carlo
+>>> mc_alg = monte_carlo.MonteCarlo()
+```
+
 ## Resources
 * [Tensorflow - Introduction to RL and Deep Q Networks](https://www.tensorflow.org/agents/tutorials/0_intro_rl)
 * [Udemy - Artificial Intelligence: Reinforcement Learning in Python](https://www.udemy.com/course/artificial-intelligence-reinforcement-learning-in-python/)

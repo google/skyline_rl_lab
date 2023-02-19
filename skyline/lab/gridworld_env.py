@@ -174,7 +174,7 @@ class GridWorldExaminer(rl_protos.RLExaminer):
   """Examiner of GridWorld."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
-            play_round: int=1) -> Comparable:
+            play_round: int=1, show_boxplot: bool=False) -> Comparable:
     """Calculates the score of given RL method."""
     collected_reward_list = []
     for _ in range(play_round):

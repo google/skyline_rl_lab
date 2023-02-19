@@ -106,12 +106,15 @@ class RLAlgorithmProto(Protocol):
 class RLExaminer(Protocol):
   """Used to calculate the score of RL method."""
 
-  def score(self, rl_method: RLAlgorithmProto, env: Environment) -> Comparable:
+  def score(self, rl_method: RLAlgorithmProto, env: Environment,
+            play_round: int=10, show_boxplot: bool=False) -> Comparable:
     """Evaluates the given RL method with given environment.i
 
     Args:
       rl_method: RL method to evaluation.
       env: Environment to evaluate given RL method.
+      play_round: How many times to evaluate the given RL method.
+      show_boxplot: True to show the Boxplot of evaluation process.
 
     Returns:
       Score of evaluation result.
