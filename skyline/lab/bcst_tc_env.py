@@ -78,6 +78,9 @@ class BCSTEnvironment(rl_protos.Environment):
     print('- Environment as BCST testing environment.')
     print('- You can set attribute `round_num` of environment to decide the max round'
           '  of execution.')
+    print('- Each action is a test case to select.')
+    print('- State is the sequence of last executed test case sequence.')
+    print('- A reward equal to 1 means the execution resulted in a crash/ramdump or 0 means nothing was caught.')
 
   def reset(self):
     """Reset the environment."""
