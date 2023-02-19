@@ -87,6 +87,46 @@ Then we can leverage utility [`gridworld_utils.py`](skyline/lab/gridworld_utils.
  1.31| 0.00| 2.00| 2.00|
 ```
 
+Then let's check the learned policy:
+```python
+>>> gridworld_utils.print_policy(mc_alg._policy, grid_env)
+---------------------------
+  D  |  R  |  D  |  ?  |
+---------------------------
+  D  |  x  |  D  |  ?  |
+---------------------------
+  R  |  R  |  D  |  x  |
+---------------------------
+  U  |  x  |  R  |  ?  |
+```
+
+Finally, we could use trained Monte Carlo method object to interact with
+environment. Below is the sample code for reference:
+```python
+# Play game util done
+grid_env.reset()
+
+print(f'Begin state={grid_env.current_state}')
+step_count = 0
+while not grid_env.is_done:
+    result = mc_alg.play(grid_env)
+    step_count += 1
+    print(result)
+
+print(f'Final reward={result.reward} with {step_count} step(s)')
+```
+
+The execution would look like:
+```shell
+Begin state=GridState(i=3, j=0)
+ActionResult(action='U', state=GridState(i=2, j=0), reward=0, is_done=False, is_truncated=False, info=None)
+ActionResult(action='R', state=GridState(i=2, j=1), reward=0, is_done=False, is_truncated=False, info=None)
+ActionResult(action='R', state=GridState(i=2, j=2), reward=0, is_done=False, is_truncated=False, info=None)
+ActionResult(action='D', state=GridState(i=3, j=2), reward=0, is_done=False, is_truncated=False, info=None)
+ActionResult(action='R', state=GridState(i=3, j=3), reward=2, is_done=True, is_truncated=False, info=None)
+Final reward=2 with 5 step(s)
+```
+
 ## Resources
 * [Tensorflow - Introduction to RL and Deep Q Networks](https://www.tensorflow.org/agents/tutorials/0_intro_rl)
 * [Udemy - Artificial Intelligence: Reinforcement Learning in Python](https://www.udemy.com/course/artificial-intelligence-reinforcement-learning-in-python/)
