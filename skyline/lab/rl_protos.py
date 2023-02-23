@@ -15,7 +15,7 @@
 """Module to get RL testing environments."""
 import dataclasses
 
-from typing import Any, Optional, Protocol
+from typing import Any, List, Optional, Protocol
 
 
 @dataclasses.dataclass
@@ -50,11 +50,11 @@ class Environment(Protocol):
     """
     ...
 
-  def available_actions(self, s: Optional[Any]=None) -> list[Any]:
+  def available_actions(self, s: Optional[Any]=None) -> List[Any]:
     """Gets available action list (from given state)."""
     ...
 
-  def available_actions_from_current_state(self) -> list[Any]:
+  def available_actions_from_current_state(self) -> List[Any]:
     """Gets available action list from current state."""
     ...
 
@@ -62,7 +62,7 @@ class Environment(Protocol):
     """Gets random action from given state."""
     ...
 
-  def available_states(self) -> list[Any]:
+  def available_states(self) -> List[Any]:
     """Gets available state list."""
     ...
 

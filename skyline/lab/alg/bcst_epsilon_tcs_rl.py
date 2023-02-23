@@ -12,7 +12,7 @@ import sys
 from skyline.lab import alg
 from skyline.lab import rl_protos
 from tqdm import tqdm
-from typing import Any
+from typing import Any, List, Optional, Dict, Tuple
 
 
 INIT_EPSILON_VALUE = sys.float_info.min
@@ -28,7 +28,7 @@ class ExecutionHistory:
   count: int = 0
   accumulated_reward: float = INIT_EPSILON_VALUE
 
-  def to_dict(self) -> dict[str, Any]:
+  def to_dict(self) -> Dict[str, Any]:
     """Turns dataclass into json data."""
     tmp_detected_symptom_counter = {}
 
@@ -42,7 +42,7 @@ class ExecutionHistory:
     return self.accumulated_reward / self.count
 
   @classmethod
-  def from_json(cls, json_data: dict[str, Any]) -> ExecutionHistory:
+  def from_json(cls, json_data: Dict[str, Any]) -> ExecutionHistory:
     """Turns json data into dataclass."""
     eh = ExecutionHistory(
         count=json_data['count'],
@@ -51,7 +51,7 @@ class ExecutionHistory:
     return eh
 
 
-QtableType = dict[str, dict[tuple[str, ...], ExecutionHistory]]
+QtableType = Dict[str, Dict[Tuple[str, ...], ExecutionHistory]]
 """Q table type."""
 
 
@@ -79,7 +79,7 @@ class TCSStrategy(alg.RLAlgorithm):
   """
   _TEST_CASE_NAME_PLACEHOLDER = 'NA'
 
-  def __init__(self, name=None, search_depth: int = 3):
+  def __init__(self, name: Optional[str]=None, search_depth: int = 3):
     super().__init__()
     self._name = name or self.__class__.__name__
     self._log = logging.getLogger(self.__class__.__name__)
@@ -141,7 +141,7 @@ class TCSStrategy(alg.RLAlgorithm):
     return self._round
 
   @property
-  def execution_path(self) -> tuple[str, ...]:
+  def execution_path(self) -> Tuple[str, ...]:
     """Accumulated execution path under given search depth."""
     return tuple(
         filter(lambda n: n != self._TEST_CASE_NAME_PLACEHOLDER,
@@ -159,7 +159,7 @@ class TCSStrategy(alg.RLAlgorithm):
     return self._search_depth
 
   @property
-  def function_count(self) -> dict[str, int]:
+  def function_count(self) -> Dict[str, int]:
     """Function selection count."""
     return self._function_selection_count
 
@@ -200,13 +200,14 @@ class EGreedyStrategy(TCSStrategy):
         for exploration.
   """
   def __init__(self,
+               name: Optional[str] = None,
                round_num: int=1000,
                search_depth: int = 3,
                eps: float = 0.3,
                beta: float = 0.1,
                gama: float = 0.7,
                foremost_exploring_num: int = 50):
-    super().__init__(search_depth)
+    super().__init__(name, search_depth)
     self._is_under_trainin = False
     self._round_num = round_num
     self._eps = eps
@@ -239,8 +240,8 @@ class EGreedyStrategy(TCSStrategy):
 
   def _next_execution_path(self, search_space: int,
                            new_test_case_name: str,
-                           execution_path: Optional[tuple[str, ...]] = None
-                           ) -> tuple[str, ...]:
+                           execution_path: Optional[Tuple[str, ...]] = None
+                           ) -> Tuple[str, ...]:
     """Gets next execution path according to input conditions.
 
     The execution path will have length as input `search_space` and the last
@@ -266,7 +267,7 @@ class EGreedyStrategy(TCSStrategy):
     return new_full_execution_path[-search_space:]
 
   def _explore(self, environment: rl_protos.Environment,
-               test_case_names: Optional[list[str]] = None) -> str:
+               test_case_names: Optional[List[str]] = None) -> str:
     """Conducts exploration in selecting test case.
 
     Args:
@@ -292,7 +293,7 @@ class EGreedyStrategy(TCSStrategy):
     return test_case_name
 
   def _exploit(self, environment: rl_protos.Environment,
-               test_case_names: Optional[list[str]] = None) -> str:
+               test_case_names: Optional[List[str]] = None) -> str:
     """Conducts exploitation in selecting test case.
 
     Args:

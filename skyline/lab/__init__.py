@@ -21,13 +21,15 @@ from skyline.lab import errors
 from skyline.lab import gridworld_env
 from skyline.lab import rl_protos
 
+from typing import Dict, List
+
 
 class Scoreboard:
   """Scoreboard to rank the RL methods."""
 
   def rank(self, examiner: rl_protos.RLExaminer,
            env: rl_protos.Environment,
-           rl_methods: list[rl_protos.RLAlgorithmProto]) -> dict[rl_protos.RLAlgorithmProto, rl_protos.Comparable]:
+           rl_methods: List[rl_protos.RLAlgorithmProto]) -> Dict[rl_protos.RLAlgorithmProto, rl_protos.Comparable]:
     """Ranks the given RL methods."""
     rl_2_score_dict = {}
     for rl_method in rl_methods:
