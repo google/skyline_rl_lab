@@ -17,6 +17,7 @@ import enum
 
 from prettytable import PrettyTable
 
+from skyline.lab import bcst_tc_env
 from skyline.lab import errors
 from skyline.lab import gridworld_env
 from skyline.lab import rl_protos
@@ -52,9 +53,16 @@ class Env(enum.Enum):
       'GridWorld',
       (
           'This is a environment to show case of Skyline lab. '
-          'The environment is a grid world where you can move up, down, right and left'
-          'if you don\'t encounter obstacle. When you obtain the reward (-1, 1, 2), '
-          'the game is over. You can use env.info() to learn more.'))
+          'The environment is a grid world where you can move up, down, right '
+          'and left if you don\'t encounter obstacle. When you obtain the '
+          'reward (-1, 1, 2), the game is over. You can use env.info() to learn'
+          ' more.'))
+  BCSTWorld = (
+      'BCSTWorld',
+      (
+          'This is a environment designed for BCST testing to select test cases'
+          ' so to compose optimal execution sequence so to catch crash/ramdump '
+          'as much as possible.'))
 
 
 def list_env():
@@ -82,5 +90,7 @@ def make(env: Env) -> rl_protos.Environment:
   """
   if env == Env.GridWorld:
     return gridworld_env.GridWorldEnvironment()
+  elif env == Env.BCSTWorld:
+    return bcst_tc_env.BCSTEnvironment()
 
   raise errors.UnknownLabEnvError(f'Unknown env={env}')
