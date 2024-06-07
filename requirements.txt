@@ -70,8 +70,8 @@ soupsieve==2.4
 stack-data==0.6.2
 terminado==0.17.1
 tinycss2==1.2.1
-tornado==6.3.3
-tqdm==4.64.1
+tornado==6.4.1
+tqdm==4.66.3
 traitlets==5.9.0
 uri-template==1.2.0
 wcwidth==0.2.6
