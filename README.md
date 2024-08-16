@@ -218,5 +218,6 @@ Below output will be produced:
 ```
 
 ## Resources
+* [Machine Learning Glossary: Reinforcement Learning](https://developers.google.com/machine-learning/glossary/rl)
 * [Tensorflow - Introduction to RL and Deep Q Networks](https://www.tensorflow.org/agents/tutorials/0_intro_rl)
 * [Udemy - Artificial Intelligence: Reinforcement Learning in Python](https://www.udemy.com/course/artificial-intelligence-reinforcement-learning-in-python/)
