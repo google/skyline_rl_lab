@@ -2,7 +2,7 @@
 We are going to implement and do experiments on RL algorithms in this repo to facilitate our research and tutoring purposes. Below we are going to explain how use this repo with a simple example.
 
 ## Environment
-For RL (Reinforcement learning) to work, we need an environment to interact with. From Skyline lab, We can list supported environment as below:
+For [**RL**](https://developers.google.com/machine-learning/glossary/rl) (Reinforcement learning) to work, we need an environment to interact with. From Skyline lab, We can list supported environment as below:
 ```python
 >>> from skyline import lab
 >>> lab.list_env()
@@ -24,17 +24,20 @@ Then We use function `make` to create the desired environment. e.g.
 s  x  .  2
 ===========
 ```
+
 Avaiable actions are indicated as follows:
 ```python
 >>> grid_env.available_actions()
 ['U', 'D', 'L', 'R']
 ```
+
 To get the current state of an environment:
 ```python
 >>> grid_env.current_state
 GridState(i=3, j=0)
 ```
-The starting position (`s`) is at the axes `(3, 1)` in this case.
+
+In this specific scenario, the starting position (`s`) is located at coordinates `(3, 0)`.
 
 Let's take an action and check how the state changes in the environment:
 ```python
@@ -56,16 +59,16 @@ GridState(i=3, j=0)
 Here we are going to test some well-known RL algorithms and demonstrate the
 usage of this lab. All RL methods we are going to implement must implement proto
 <font color='blue'>**RLAlgorithmProto**</font> in
-[`rl_protos.py`](skyline/lab/rl_protos.p). We will take a look at the
+[`rl_protos.py`](skyline/rl_protos.py). We will take a look at the
 implementation of some RL methods to see how they are used.
 
 <a id='monte_carlo_method'></a>
 ### Monte Carlo Method
 <b>In this method, we simply simulate many trajectories</b> (<font color='brown'>decision processes</font>)<b>, and calculate the average returns.</b> ([wiki page](https://en.wikiversity.org/wiki/Reinforcement_Learning#Monte_Carlo_policy_evaluation))
 
-We implement this algorithm in [`monte_carlo.py`](skyline/lab/alg/monte_carlo.py). The code snippet below will initialize this RL method:
+We implement this algorithm in [`monte_carlo.py`](skyline/alg/monte_carlo.py). The code snippet below will initialize this RL method:
 ```python
->>> from skyline.lab.alg import monte_carlo
+>>> from skyline.alg import monte_carlo
 >>> mc_alg = monte_carlo.MonteCarlo()
 ```
 
@@ -77,6 +80,7 @@ environment object. For example:
 
 Then we can leverage utility [`gridworld_utils.py`](skyline/lab/gridworld_utils.py) to print out the learned RL knowledge. Below is the learned [value function](https://en.wikipedia.org/wiki/Reinforcement_learning#Value_function) from the Monte Carlo method:
 ```python
+>>> from skyline.lab import gridworld_utils
 >>> gridworld_utils.print_values(mc_alg._state_2_value, grid_env)
 ---------------------------
  1.18| 1.30| 1.46| 1.00|
@@ -132,7 +136,7 @@ Final reward=2 with 5 step(s)
 This method takes random action(s) in the given environment. It is often used as a baseline to evaluate other RL methods. The code below will instantiate a Random RL method:
 
 ```python
-from skyline.lab.alg import random_rl
+from skyline.alg import random_rl
 
 random_alg = random_rl.RandomRL()
 ```
@@ -180,9 +184,12 @@ different RL methods.
 Every environment can have more than one examiner to calculate the score of RL method. Each examiner may have its own aspect to evaluate the RL method (time, reward etc.). Let's check one used to calculate the average reward of grid environment:
 
 ```python
+from skyline.lab import gridworld_env
+
 # This examiner considers both reward and number of steps.
 examiner = gridworld_env.GridWorldExaminer()
 ```
+
 Then, what's score of Monte Carlo Method:
 ```python
 # Monte Carlo will get reward 2 by taking 5 steps.
@@ -197,16 +204,20 @@ examiner.score(mc_alg, grid_env)
 # Also the best reward is not guaranteed. So the score here will be random.
 examiner.score(random_alg, grid_env)
 ```
+
 Random RL method often got scores to be less than Monte Carlo method.
 
 ### Scoreboard
 Scoreboard literally calculate the scores of given RL methods according to the specific examiner and the rank those RL methods accordingly:
 
 ```python
+from skyline import lab
+
 score_board = lab.Scoreboard()
 sorted_scores  = score_board.rank(
     examiner=examiner, env=grid_env, rl_methods=[random_alg, mc_alg])
 ```
+
 Below output will be produced:
 ```
 +-------+------------+---------------------+

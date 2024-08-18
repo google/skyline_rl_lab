@@ -8,6 +8,7 @@ contourpy==1.2.1
 cryptography==43.0.0
 cycler==0.12.1
 docutils==0.21.2
+flake8==7.1.1
 fonttools==4.53.1
 google-auth==2.33.0
 idna==3.7
@@ -22,6 +23,7 @@ keyrings.google-artifactregistry-auth==1.1.2
 kiwisolver==1.4.5
 markdown-it-py==3.0.0
 matplotlib==3.9.2
+mccabe==0.7.0
 mdurl==0.1.2
 more-itertools==10.4.0
 nh3==0.2.18
@@ -33,7 +35,9 @@ pluggy==1.5.0
 prettytable==3.11.0
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
+pycodestyle==2.12.1
 pycparser==2.22
+pyflakes==3.2.0
 Pygments==2.18.0
 pyparsing==3.1.2
 pyproject_hooks==1.1.0

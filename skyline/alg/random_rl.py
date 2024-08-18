@@ -13,12 +13,10 @@
 # limitations under the License.
 
 """This module implement random algorithm to interact with environment."""
-import numpy as np
 import random
 
-from skyline.lab import alg
-from skyline.lab import rl_protos
-from tqdm import tqdm
+from skyline import alg
+from skyline import rl_protos
 
 
 class RandomRL(alg.RLAlgorithm):

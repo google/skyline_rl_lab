@@ -18,9 +18,15 @@ from __future__ import annotations
 import random
 from skyline.lab import errors
 from skyline.lab import rl_protos
-from typing import Optional
+from typing import Any, Optional
 import enum
 import dataclasses
+
+
+ActionResult = rl_protos.ActionResult
+Comparable = rl_protos.Comparable
+RLAlgorithmProto = rl_protos.RLAlgorithmProto
+Environment = rl_protos.Environment
 
 
 @dataclasses.dataclass
@@ -42,13 +48,12 @@ class GridState:
     return hash((self.i, self.j))
 
 
-
 class GridAction(enum.Enum):
   """Actions in GridWorld."""
-  UP=('U', -1, 0)
-  DOWN=('D', 1, 0)
-  LEFT=('L', 0, -1)
-  RIGHT=('R', 0, 1)
+  UP = ('U', -1, 0)
+  DOWN = ('D', 1, 0)
+  LEFT = ('L', 0, -1)
+  RIGHT = ('R', 0, 1)
 
   @classmethod
   def get_move(cls, action_str: str):
@@ -119,12 +124,12 @@ class GridWorldEnvironment(rl_protos.Environment):
     """Sets the current state."""
     self._state = s.copy()
 
-  def random_action(self, s: Optional[GridState]=None) -> Optional[str]:
+  def random_action(self, s: Optional[GridState] = None) -> Optional[str]:
     """Get random action."""
     s = s or self.current_state
     return random.choice(self.actions.get(s, [None]))
 
-  def available_actions(self, s: Optional[GridState]=None) -> list[Any]:
+  def available_actions(self, s: Optional[GridState] = None) -> list[Any]:
     """Get available actions."""
     if not s:
       return [action.value[0] for action in GridAction]
@@ -150,7 +155,7 @@ class GridWorldEnvironment(rl_protos.Environment):
     new_state.i += move_i
     new_state.j += move_j
     self._state = new_state.copy()
-    reward =  self.rewards.get(self._state, 0)
+    reward = self.rewards.get(self._state, 0)
 
     return rl_protos.ActionResult(
         action=action,
@@ -174,7 +179,7 @@ class GridWorldExaminer(rl_protos.RLExaminer):
   """Examiner of GridWorld."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
-            play_round: int=1, show_boxplot: bool=False) -> Comparable:
+            play_round: int = 1, show_boxplot: bool = False) -> Comparable:
     """Calculates the score of given RL method."""
     collected_reward_list = []
     for _ in range(play_round):
