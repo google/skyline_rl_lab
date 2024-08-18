@@ -16,14 +16,20 @@
 
 from __future__ import annotations
 from copy import deepcopy
+from typing import Any, Optional
 import dataclasses
-from itertools import permutations, product
+from itertools import product
 import matplotlib.pyplot as plt
 import random
 from immutabledict import immutabledict
 
-from skyline.lab import errors
 from skyline.lab import rl_protos
+
+
+ActionResult = rl_protos.ActionResult
+Comparable = rl_protos.Comparable
+Environment = rl_protos.Environment
+RLAlgorithmProto = rl_protos.RLAlgorithmProto
 
 
 @dataclasses.dataclass
@@ -34,9 +40,9 @@ class TestCaseModel:
 
 
 DEFAULT_TEST_CASE_MODEL = TestCaseModel(
-    test_case_name_set = frozenset([
+    test_case_name_set=frozenset([
         f'rl_test_case{i}' for i in range(1, 6)]),
-    fail_state_info = immutabledict({
+    fail_state_info=immutabledict({
         ('rl_test_case1',): 0.1,
         ('rl_test_case2',): 0.05,
         ('rl_test_case3',): 0.2,
@@ -64,23 +70,27 @@ class BCSTEnvironment(rl_protos.Environment):
     self._test_case_list = list(test_case_model.test_case_name_set)
     self._fail_state_info = test_case_model.fail_state_info.copy()
     self._selected_test_case_history = []
-    self._available_state_list = [tuple()] + [tuple([test_case]) for test_case in self._test_case_list]
+    self._available_state_list = (
+        [tuple()] +
+        [tuple([test_case])for test_case in self._test_case_list])
     self._max_test_case_sequence_length = max([
-        len(test_case_sequence) for test_case_sequence in self._fail_state_info.keys()])
+        len(test_case_sequence)
+        for test_case_sequence in self._fail_state_info.keys()])
 
     if self._max_test_case_sequence_length > 1:
       for sequence_length in range(2, self._max_test_case_sequence_length+1):
-        for test_case_sequence in product(self._test_case_list, repeat=sequence_length):
+        for test_case_sequence in product(
+            self._test_case_list, repeat=sequence_length):
           self._available_state_list.append(test_case_sequence)
 
   def info(self) -> Any:
     """Get environment information."""
     print('- Environment as BCST testing environment.')
-    print('- You can set attribute `round_num` of environment to decide the max round'
+    print('- You can set attribute `round_num` of environment to decide the max round'  # noqa: E501
           '  of execution.')
     print('- Each action is a test case to select.')
     print('- State is the sequence of last executed test case sequence.')
-    print('- A reward equal to 1 means the execution resulted in a crash/ramdump or 0 means nothing was caught.')
+    print('- A reward equal to 1 means the execution resulted in a crash/ramdump or 0 means nothing was caught.')  # noqa: E501
 
   def reset(self):
     """Reset the environment."""
@@ -91,11 +101,11 @@ class BCSTEnvironment(rl_protos.Environment):
     """Sets the current state."""
     self._selected_test_case_history = list(deepcopy(s))
 
-  def random_action(self, s: Optional[str]=None) -> Optional[str]:
+  def random_action(self, s: Optional[str] = None) -> Optional[str]:
     """Get random action."""
     return random.choice(self._test_case_list)
 
-  def available_actions(self, s: Optional[str]=None) -> list[str]:
+  def available_actions(self, s: Optional[str] = None) -> list[str]:
     """Get available actions."""
     return self._test_case_list.copy()
 
@@ -130,7 +140,7 @@ class BCSTEnvironment(rl_protos.Environment):
     for seq_length in range(1, len(self.current_state)+1):
       state = self.current_state[-seq_length:]
       fail_prob = self._fail_state_info.get(state, 0)
-      if random.uniform(0,1) <= fail_prob:
+      if random.uniform(0, 1) <= fail_prob:
         reward = 1
         break
 
@@ -146,8 +156,8 @@ class BCSTRewardCountExaminer(rl_protos.RLExaminer):
   """Examiner to count reward collected by RL method."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
-            play_round: int=10,
-            show_boxplot: bool=False) -> tuple[Comparable, list[int]]:
+            play_round: int = 10,
+            show_boxplot: bool = False) -> tuple[Comparable, list[int]]:
     """Calculates the score of given RL method."""
     collected_reward_list = []
     for _ in range(play_round):

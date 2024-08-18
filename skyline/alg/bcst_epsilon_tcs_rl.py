@@ -5,7 +5,6 @@ import collections
 import dataclasses
 import enum
 import logging
-import numpy as np
 import random
 import sys
 
@@ -22,6 +21,7 @@ DefaultSymtomDictField = dataclasses.field(
     default_factory=collections.defaultdict)
 """Default symptom dict field in dataclass."""
 
+
 @dataclasses.dataclass
 class ExecutionHistory:
   """BCST test case execution history."""
@@ -30,8 +30,6 @@ class ExecutionHistory:
 
   def to_dict(self) -> Dict[str, Any]:
     """Turns dataclass into json data."""
-    tmp_detected_symptom_counter = {}
-
     return {
         'count': self.count,
         'accumulated_reward': self.accumulated_reward,
@@ -79,7 +77,7 @@ class TCSStrategy(alg.RLAlgorithm):
   """
   _TEST_CASE_NAME_PLACEHOLDER = 'NA'
 
-  def __init__(self, name: Optional[str]=None, search_depth: int = 3):
+  def __init__(self, name: Optional[str] = None, search_depth: int = 3):
     super().__init__()
     self._name = name or self.__class__.__name__
     self._log = logging.getLogger(self.__class__.__name__)
@@ -201,7 +199,7 @@ class EGreedyStrategy(TCSStrategy):
   """
   def __init__(self,
                name: Optional[str] = None,
-               round_num: int=1000,
+               round_num: int = 1000,
                search_depth: int = 3,
                eps: float = 0.3,
                beta: float = 0.1,
@@ -277,15 +275,17 @@ class EGreedyStrategy(TCSStrategy):
     Returns:
       The selected test case.
     """
-    test_case_names = test_case_names or environment.available_actions_from_current_state()
+    test_case_names = (
+        test_case_names or environment.available_actions_from_current_state())
     for test_case_name in random.sample(
         test_case_names, k=len(test_case_names)):
       for search_space in range(1, self._search_depth + 1):
         new_execute_path = self._next_execution_path(search_space,
                                                      test_case_name)
         if new_execute_path not in self.qtable.get(str(search_space), {}):
-          self._log.info('Exploring untouched sequence with test case=%s',
-                        test_case_name)
+          self._log.info(
+              'Exploring untouched sequence with test case=%s',
+              test_case_name)
           return test_case_name
 
     test_case_name = random.choice(test_case_names)
@@ -341,8 +341,9 @@ class EGreedyStrategy(TCSStrategy):
           self._qfunc[new_execution_path] = weight
           weight += next_max_weight * self._gama * self._search_depth
 
-      self._log.debug('\t%s with weighting=%.02f (count=%s)',
-                     new_execution_path, weight, f'{count:,d}')
+      self._log.debug(
+          '\t%s with weighting=%.02f (count=%s)',
+          new_execution_path, weight, f'{count:,d}')
       weighting_data.append(weight)
 
     if self._is_under_trainin:
@@ -354,7 +355,6 @@ class EGreedyStrategy(TCSStrategy):
   def _run_policy(self, environment: rl_protos.Environment) -> str:
     """Runs ε-Greedy Policy to select BCST test case."""
     p = random.random()
-    test_case_names = environment.available_actions_from_current_state()
     if self._is_under_trainin:
       if self.round < self.foremost_exploring_num:
         selected_bcst_test_case = self._explore(environment)

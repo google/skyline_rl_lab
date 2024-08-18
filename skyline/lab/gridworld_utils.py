@@ -39,7 +39,7 @@ def print_values(V, env: gridworld_env.GridWorldEnvironment):
         if v >= 0:
           print(" %.2f|" % v, end="")
         else:
-          print("%.2f|" % v, end="") # -ve sign takes up an extra space
+          print("%.2f|" % v, end="")  # -ve sign takes up an extra space
     print("")
 
 

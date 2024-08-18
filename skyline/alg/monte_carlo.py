@@ -14,8 +14,8 @@
 
 """This module implement monte carlo algorithm to conduct RL."""
 import numpy as np
-from skyline.lab import alg
-from skyline.lab import rl_protos
+from skyline import alg
+from skyline import rl_protos
 from tqdm import tqdm
 from typing import Optional
 
@@ -23,7 +23,9 @@ from typing import Optional
 class MonteCarlo(alg.RLAlgorithm):
   """Monte Carlo Method."""
 
-  def __init__(self, name: Optional[str]=None, round_num: int=10000, gamma: float=0.9):
+  def __init__(
+      self, name: Optional[str] = None,
+      round_num: int = 10000, gamma: float = 0.9):
     self._name = name or self.__class__.__name__
     self._round = round_num
     self._gamma = gamma
@@ -51,7 +53,6 @@ class MonteCarlo(alg.RLAlgorithm):
     """Conducts training by given environment."""
     # initialize V(s) and returns
     self._reset()
-    returns = {}  # dictionary of state -> list of returns we've received
     states = environment.available_states()
     actions = environment.available_actions()
     for s in states:

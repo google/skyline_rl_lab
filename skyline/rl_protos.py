@@ -50,7 +50,7 @@ class Environment(Protocol):
     """
     ...
 
-  def available_actions(self, s: Optional[Any]=None) -> List[Any]:
+  def available_actions(self, s: Optional[Any] = None) -> List[Any]:
     """Gets available action list (from given state)."""
     ...
 
@@ -58,7 +58,7 @@ class Environment(Protocol):
     """Gets available action list from current state."""
     ...
 
-  def random_action(self, s: Optional[Any]=None) -> Optional[Any]:
+  def random_action(self, s: Optional[Any] = None) -> Optional[Any]:
     """Gets random action from given state."""
     ...
 
@@ -107,7 +107,7 @@ class RLExaminer(Protocol):
   """Used to calculate the score of RL method."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
-            play_round: int=10, show_boxplot: bool=False) -> Comparable:
+            play_round: int = 10, show_boxplot: bool = False) -> Comparable:
     """Evaluates the given RL method with given environment.i
 
     Args:

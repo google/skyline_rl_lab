@@ -15,7 +15,7 @@
 import numpy as np
 
 from skyline.lab import rl_protos
-from typing import Any, Optional, Mapping, Protocol, Union
+from typing import Any, Mapping, Union
 
 
 class RLAlgorithm(rl_protos.RLAlgorithmProto):
