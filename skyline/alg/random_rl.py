@@ -34,3 +34,8 @@ class RandomRL(alg.RLAlgorithm):
     random_action = random.choice(
         environment.available_actions_from_current_state())
     return environment.step(random_action)
+
+  def passive_play(self, environment: rl_protos.Environment):
+    """Passive play by returning action only."""
+    return random.choice(
+        environment.available_actions_from_current_state())

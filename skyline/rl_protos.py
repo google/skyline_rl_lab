@@ -13,9 +13,10 @@
 # limitations under the License.
 
 """Module to get RL testing environments."""
+import abc
 import dataclasses
 
-from typing import Any, List, Optional, Protocol
+from typing import Any, Sequence, Optional, Protocol, TypeAlias
 
 
 @dataclasses.dataclass
@@ -28,12 +29,21 @@ class ActionResult:
   info: Optional[Any] = None
 
 
-class Comparable(Protocol):
-  """Something that is comparable used in sorting."""
-  def __lt__(self, other: Any) -> bool: ...
+class _ComparableOp(Protocol):
+  """Protocol for annotating comparable types."""
+
+  @abc.abstractmethod
+  def __lt__(self: Any, other: Any) -> bool:
+    pass
+
+
+Comparable: TypeAlias = float | int | _ComparableOp
+ExamineScore: TypeAlias = tuple[Comparable, list[Comparable]]
 
 
 class Environment(Protocol):
+  """Environment of RL problem."""
+
   def reset(self):
     """Resets the environment."""
     ...
@@ -42,19 +52,21 @@ class Environment(Protocol):
     """Get environment information."""
     ...
 
-  def step(self, action: Any) -> ActionResult:
+  def step(self, action: Any, tentative: bool = False) -> ActionResult:
     """Takes action in the environment.
 
     Args:
       action: Action to take.
+      tentative: True to return the result without changing the state of
+          environment.
     """
     ...
 
-  def available_actions(self, s: Optional[Any] = None) -> List[Any]:
+  def available_actions(self, s: Optional[Any] = None) -> Sequence[Any]:
     """Gets available action list (from given state)."""
     ...
 
-  def available_actions_from_current_state(self) -> List[Any]:
+  def available_actions_from_current_state(self) -> Sequence[Any]:
     """Gets available action list from current state."""
     ...
 
@@ -62,7 +74,11 @@ class Environment(Protocol):
     """Gets random action from given state."""
     ...
 
-  def available_states(self) -> List[Any]:
+  def render(self):
+    """Renders environment."""
+    ...
+
+  def available_states(self) -> list[Any]:
     """Gets available state list."""
     ...
 
@@ -85,9 +101,23 @@ class Environment(Protocol):
     """Checks if environment is completed."""
     ...
 
+  @property
+  def round_num(self) -> int:
+    """Maximum number of playing round."""
+    ...
+
+  @round_num.setter
+  def round_num(self, val: int):
+    """Sets maximum number of playing round."""
+    ...
+
 
 class RLAlgorithmProto(Protocol):
-  """Reinforcement learning algorithm protocol."""
+  """Reinforcement learning algorithm protocol.
+
+  Attributes:
+    name: Name of RL algorithm.
+  """
 
   @property
   def name(self) -> str:
@@ -102,12 +132,17 @@ class RLAlgorithmProto(Protocol):
     """Plays in the given environment."""
     ...
 
+  def passive_play(self, environment: Environment):
+    """Passive play by returning action only."""
+    ...
+
 
 class RLExaminer(Protocol):
   """Used to calculate the score of RL method."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
-            play_round: int = 10, show_boxplot: bool = False) -> Comparable:
+            play_round: int = 10, show_boxplot: bool = False,
+            extra_data: Any | None = None) -> ExamineScore:
     """Evaluates the given RL method with given environment.i
 
     Args:
@@ -115,8 +150,9 @@ class RLExaminer(Protocol):
       env: Environment to evaluate given RL method.
       play_round: How many times to evaluate the given RL method.
       show_boxplot: True to show the Boxplot of evaluation process.
+      extra_data: Extra data used in calculating score.
 
     Returns:
-      Score of evaluation result.
+      Score information of evaluation result.
     """
     ...
