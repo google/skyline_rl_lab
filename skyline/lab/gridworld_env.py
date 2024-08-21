@@ -18,7 +18,7 @@ from __future__ import annotations
 import random
 from skyline.lab import errors
 from skyline.lab import rl_protos
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 import enum
 import dataclasses
 
@@ -57,9 +57,22 @@ class GridAction(enum.Enum):
 
   @classmethod
   def get_move(cls, action_str: str):
+    """Gets the moving direction from the given action.
+
+    Args:
+      action_str: Action in string.
+
+    Returns:
+      tuple(row direction, column direction)
+
+    Raises:
+      errors.IllegalActionError: Illegal action string.
+    """
     for action in cls:
       if action.value[0] == action_str:
         return action.value[1:]
+
+    raise errors.IllegalActionError('Unknown action={action_str}')
 
 
 class GridWorldEnvironment(rl_protos.Environment):
@@ -78,9 +91,17 @@ class GridWorldEnvironment(rl_protos.Environment):
   .  .  .  x
   s  x  .  2
   ```
+
+  Attributes:
+    rows: Number of rows in the grid.
+    cols: Number of columns in the grid.
+    rewards: Mapping from state to granted reward.
+    actions: Mapping from state to available action(s).
   """
 
-  def __init__(self, init_state: Optional[GridState] = None):
+  def __init__(self,
+               init_state: Optional[GridState] = None,
+               reward_info: dict[GridState, int] | None = None):
     self.rows = 4
     self.cols = 4
     init_state = init_state or GridState(i=3, j=0)
@@ -102,6 +123,13 @@ class GridWorldEnvironment(rl_protos.Environment):
       GridState(3, 0): ('U'),
       GridState(3, 2): ('U', 'R'),
     }
+    self._state_history: list[GridState] = [self._state]
+    if reward_info:
+      for state, new_reward in reward_info.items():
+        if state not in self.rewards:
+          raise errors.IllegalLabEnvError(
+              'Illegal input reward state info(state={state})')
+        self.rewards[state] = new_reward
 
   def info(self) -> Any:
     """Get environment information."""
@@ -110,15 +138,19 @@ class GridWorldEnvironment(rl_protos.Environment):
     print('- s means start position')
     print('- number means reward at that state')
     print('===========')
-    print('.  .  .  1')
-    print('.  x  . -1')
+    reward_state0_3 = '{:>2}'.format(self.rewards[GridState(0, 3)])
+    reward_state1_3 = '{:>2}'.format(self.rewards[GridState(1, 3)])
+    reward_state3_3 = '{:>2}'.format(self.rewards[GridState(3, 3)])
+    print(f'.  .  . {reward_state0_3}')
+    print(f'.  x  . {reward_state1_3}')
     print('.  .  .  x')
-    print('s  x  .  2')
+    print(f's  x  . {reward_state3_3}')
     print('===========\n')
 
   def reset(self):
     """Reset the environment."""
     self._state = self._begin_state.copy()
+    self._state_history.clear()
 
   def set_state(self, s: GridState):
     """Sets the current state."""
@@ -144,18 +176,23 @@ class GridWorldEnvironment(rl_protos.Environment):
     """Gets available state list."""
     return [state.copy() for state in self.actions.keys()]
 
-  def step(self, action: str) -> ActionResult:
+  def step(
+      self, action: str, tentative: bool = False) -> ActionResult:
     # check if legal move first
     new_state = self._state.copy()
-    if action not in self.actions[new_state]:
+    if action not in self.actions.get(new_state, []):
       raise errors.IllegalActionError(
           f'action={action} can not in state={new_state}')
 
     move_i, move_j = GridAction.get_move(action)
     new_state.i += move_i
     new_state.j += move_j
-    self._state = new_state.copy()
+    if not tentative:
+      self._state = new_state.copy()
+
     reward = self.rewards.get(self._state, 0)
+    if not tentative:
+      self._state_history.append(new_state)
 
     return rl_protos.ActionResult(
         action=action,
@@ -174,13 +211,43 @@ class GridWorldEnvironment(rl_protos.Environment):
     """Checks if environment is completed."""
     return self._state not in self.actions
 
+  def render(self, render_func: Callable[..., Any] = print):
+    """Renders the current environment in console."""
+    history_state_set = set(self._state_history)
+    for ri in range(self.rows):
+      for ci in range(self.cols):
+        state = GridState(ri, ci)
+        state_str = '  .' if state in self.actions else '  x'
+        if state in history_state_set:
+          state_str = '  e' if state in self.rewards else '  +'
+        elif state == self._begin_state:
+          state_str = '  s'
+        elif state in self.rewards:
+          state_str = '{:>3}'.format(self.rewards[state])
+        render_func(state_str, end='')
+      render_func('')
+    render_func('')
+
 
 class GridWorldExaminer(rl_protos.RLExaminer):
   """Examiner of GridWorld."""
 
   def score(self, rl_method: RLAlgorithmProto, env: Environment,
             play_round: int = 1, show_boxplot: bool = False) -> Comparable:
-    """Calculates the score of given RL method."""
+    """Calculates the score of given RL method.
+
+    Args:
+      rl_method: RL method/algorithm to calculate the score.
+      env: The target environment for given RL method to play with.
+      play_round: Number of round for given RL method to interact with target
+          environment.
+      show_boxplot: Show Boxplot chart iff True. Please turn on this flag only
+          when calling this method in colab.
+      extra_data: Extra data required to calculate the score.
+
+    Returns:
+      The calculated score.
+    """
     collected_reward_list = []
     for _ in range(play_round):
       env.reset()
@@ -193,4 +260,6 @@ class GridWorldExaminer(rl_protos.RLExaminer):
 
       collected_reward_list.append(accumulated_reward / step_count)
 
-    return sum(collected_reward_list) / len(collected_reward_list)
+    return (
+        sum(collected_reward_list) / len(collected_reward_list),
+        collected_reward_list)

@@ -31,22 +31,43 @@ class Scoreboard:
   def rank(self, examiner: rl_protos.RLExaminer,
            env: rl_protos.Environment,
            rl_methods: List[rl_protos.RLAlgorithmProto],
+           show_ranking_in_console: bool = False,
+           decimal=2,
            ) -> Dict[rl_protos.RLAlgorithmProto, rl_protos.Comparable]:
-    """Ranks the given RL methods."""
+    """Ranks the given RL methods.
+
+    Args:
+      examiner: Aspect of focus to examine the performance of given RL methods.
+      env: Target RL environment for given RL methods to play with.
+      rl_methods: List of RL methods for evaluation.
+      show_ranking_in_console: Show ranking result in console iff True.
+      decimal: Decimal point of score.
+
+    Returns:
+      Ranking result as dict object with key as RL method and value as ranking
+          score.
+    """
     rl_2_score_dict = {}
     for rl_method in rl_methods:
       rl_2_score_dict[rl_method.name] = examiner.score(rl_method, env)
 
-    sorted_scores = sorted(
-        rl_2_score_dict.items(), key=lambda t: t[1], reverse=True)
+    if show_ranking_in_console:
+      sorted_scores = sorted(
+          rl_2_score_dict.items(), key=lambda t: t[1], reverse=True)
 
-    score_board = PrettyTable()
-    score_board.field_names = ['Rank.', 'RL Name', 'Score']
-    for rank, score_info in enumerate(sorted_scores, start=1):
-      score_board.add_row([rank, score_info[0], score_info[1]])
+      score_board = PrettyTable()
+      score_board.field_names = ['Rank.', 'RL Name', 'Score']
+      for rank, score_info in enumerate(sorted_scores, start=1):
+        avg_score = round(score_info[1][0], decimal)
+        score_list = list(map(lambda s: round(s, decimal), score_info[1][1]))
+        score_board.add_row([
+            rank,
+            score_info[0],
+            (avg_score, score_list)])
 
-    print(score_board)
-    return sorted_scores
+      print(score_board)
+
+    return rl_2_score_dict
 
 
 class Env(enum.Enum):

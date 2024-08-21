@@ -22,7 +22,9 @@ from skyline import rl_protos
 class RandomRL(alg.RLAlgorithm):
   """Random Method."""
 
-  def __init__(self, seed_num: int = 123):
+  def __init__(self, seed_num: int = 123, name: str | None = None):
+    name = name or self.__class__.__name__
+    super().__init__(name)
     random.seed(seed_num)
 
   def fit(self, environment: rl_protos.Environment):
@@ -34,3 +36,8 @@ class RandomRL(alg.RLAlgorithm):
     random_action = random.choice(
         environment.available_actions_from_current_state())
     return environment.step(random_action)
+
+  def passive_play(self, environment: rl_protos.Environment):
+    """Passive play by returning action only."""
+    return random.choice(
+        environment.available_actions_from_current_state())

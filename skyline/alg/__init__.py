@@ -14,11 +14,21 @@
 
 import numpy as np
 
+from skyline import errors
 from skyline.lab import rl_protos
 from typing import Any, Mapping, Union
 
 
 class RLAlgorithm(rl_protos.RLAlgorithmProto):
+  """Extended class to enhance `rl_protos.RLAlgorithmProto`."""
+
+  def __init__(self, name: str):
+    self._name = name
+
+  @property
+  def name(self) -> str:
+    """Gets name of RL method."""
+    return self._name
 
   def max_dict(self, d: Mapping[Any, Union[int, float]]):
     """ returns the argmax (key) and max (value) from a dictionary
@@ -32,3 +42,6 @@ class RLAlgorithm(rl_protos.RLAlgorithmProto):
     max_keys = [key for key, val in d.items() if val == max_val]
 
     return np.random.choice(max_keys), max_val
+
+  def passive_play(self, environment: rl_protos.Environment):
+    raise errors.UnsupportedOperationError()

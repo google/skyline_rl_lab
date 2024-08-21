@@ -13,11 +13,24 @@
 # limitations under the License.
 
 """This module implement monte carlo algorithm to conduct RL."""
+import collections
+import dataclasses
 import numpy as np
 from skyline import alg
 from skyline import rl_protos
 from tqdm import tqdm
-from typing import Optional
+from typing import Any, Optional, Sequence
+
+
+_DEFAULTDICT = collections.defaultdict
+
+
+@dataclasses.dataclass(frozen=True)
+class ExploringCollection:
+  """Dataclass to hold collected information why exploring environment."""
+  states: Sequence[Any]
+  actions: Sequence[Any]
+  rewards: Sequence[float]
 
 
 class MonteCarlo(alg.RLAlgorithm):
@@ -25,16 +38,22 @@ class MonteCarlo(alg.RLAlgorithm):
 
   def __init__(
       self, name: Optional[str] = None,
-      round_num: int = 10000, gamma: float = 0.9):
-    self._name = name or self.__class__.__name__
+      round_num: int = 10000, gamma: float = 0.9,
+      default_q_value: float = 0,
+      max_tcs_length: int = 4):
+    super().__init__(name or self.__class__.__name__)
     self._round = round_num
     self._gamma = gamma
+    self._default_q_value = default_q_value
+    self._max_tcs_length = max_tcs_length
     self._state_2_value = {}
     self._q = {}
     self._policy = {}  # Key as state; value as action
     self._deltas = []
     self._sample_counts = {}
     self._deltas = []
+    # Key as state; value as hit count
+    self._short_team_memory = _DEFAULTDICT(int)
 
   def _reset(self):
     self._state_2_value = {}

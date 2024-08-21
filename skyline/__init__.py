@@ -16,6 +16,6 @@
 RL (Reinforcement learning) package.
 """
 
-__version__ = '0.0.1.1'
+__version__ = '0.0.1.2'
 __author__ = 'John Lee'
 __credits__ = 'Google Pixel'

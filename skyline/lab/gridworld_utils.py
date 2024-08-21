@@ -17,11 +17,12 @@
 from skyline.lab import gridworld_env
 
 
-def print_values(V, env: gridworld_env.GridWorldEnvironment):
+def print_values(value_func: dict[gridworld_env.GridState, float],
+                 env: gridworld_env.GridWorldEnvironment):
   """Prints the value of all states in GridWorld.
 
   Args:
-    V: Learned value function with key as state; value as value.
+    value_func: Learned value function with key as state; value as value.
     env: GridWorldEnvironment object.
   """
   for i in range(env.rows):
@@ -35,7 +36,7 @@ def print_values(V, env: gridworld_env.GridWorldEnvironment):
         else:
           print("%.2f|" % env.rewards[state], end="")
       else:
-        v = V.get(state, 0)
+        v = value_func.get(state, 0)
         if v >= 0:
           print(" %.2f|" % v, end="")
         else:
@@ -43,11 +44,12 @@ def print_values(V, env: gridworld_env.GridWorldEnvironment):
     print("")
 
 
-def print_policy(P, env: gridworld_env.GridWorldEnvironment):
+def print_policy(policy_dict: dict[gridworld_env.GridState, str],
+                 env: gridworld_env.GridWorldEnvironment):
   """Prints the policy of all states in GridWorld.
 
   Args:
-    P: Learned policy with key as state; value as action.
+    policy_dict: Learned policy with key as state; value as action.
     env: GridWorldEnvironment object.
   """
   for i in range(env.rows):
@@ -58,6 +60,6 @@ def print_policy(P, env: gridworld_env.GridWorldEnvironment):
         print("  ?  |", end="")
         continue
 
-      a = P.get(state, 'x')
+      a = policy_dict.get(state, 'x')
       print("  %s  |" % a, end="")
     print("")
